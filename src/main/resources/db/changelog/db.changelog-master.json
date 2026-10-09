@@ -1,0 +1,58 @@
+{
+  "databaseChangeLog": [
+    {
+      "include": {
+        "file": "migrations/master/01_master_admin_role.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/admin/02_superadmin.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/admin/03_admin.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/admin/04_superadmin_add_otp_verified.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/admin/05_admin_add_otp_verified.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/sidebar/01_sidebar.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/sidebar/02_role_sidebar_map.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "seeder/01_superadmin_seeder.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "seeder/02_role_seeder.json",
+        "relativeToChangelogFile": true
+      }
+    }
+  ]
+}

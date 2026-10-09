@@ -1,0 +1,44 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "superadmin-seeder-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "insert": {
+              "tableName": "superadmins",
+              "columns": [
+                {
+                  "column": {
+                    "name": "full_name",
+                    "value": "Koushik Mondal"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "email",
+                    "value": "koushiksuperadmin@yopmail.com"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "password",
+                    "value": "$2a$10$1C7bL4U0.kR2fT2y2u2.P.rG.73oD4M.Jk9/4.H9e6Q7c.2a6c/cK"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "is_active",
+                    "valueNumeric": 1
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

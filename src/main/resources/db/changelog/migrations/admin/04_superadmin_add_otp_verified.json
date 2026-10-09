@@ -1,0 +1,33 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "admin-role-4",
+        "author": "skyware",
+        "changes": [
+          {
+            "addColumn": {
+              "tableName": "superadmins",
+              "columns": [
+                {
+                  "column": {
+                    "name": "otp_verified",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "is_verified",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "master-role-seeder-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "insert": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "name", "value": "Admin" } },
+                { "column": { "name": "code", "value": "ADMIN" } },
+                { "column": { "name": "is_active", "valueNumeric": 1 } }
+              ]
+            }
+          },
+          {
+            "insert": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "name", "value": "Manager" } },
+                { "column": { "name": "code", "value": "MANAGER" } },
+                { "column": { "name": "is_active", "valueNumeric": 1 } }
+              ]
+            }
+          },
+          {
+            "insert": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "name", "value": "Chartered Accountant" } },
+                { "column": { "name": "code", "value": "CA" } },
+                { "column": { "name": "is_active", "valueNumeric": 1 } }
+              ]
+            }
+          },
+          {
+            "insert": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "name", "value": "Sales" } },
+                { "column": { "name": "code", "value": "SALES" } },
+                { "column": { "name": "is_active", "valueNumeric": 1 } }
+              ]
+            }
+          },
+          {
+            "insert": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "name", "value": "Vendor" } },
+                { "column": { "name": "code", "value": "VENDOR" } },
+                { "column": { "name": "is_active", "valueNumeric": 1 } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

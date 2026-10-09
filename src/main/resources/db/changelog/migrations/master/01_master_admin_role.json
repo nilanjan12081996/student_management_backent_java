@@ -1,0 +1,25 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "master-role-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "master_admin_role",
+              "columns": [
+                { "column": { "name": "id", "type": "BIGINT UNSIGNED", "autoIncrement": true, "constraints": { "primaryKey": true } } },
+                { "column": { "name": "name", "type": "VARCHAR(100)", "constraints": { "nullable": false } } },
+                { "column": { "name": "code", "type": "VARCHAR(50)", "constraints": { "nullable": false } } },
+                { "column": { "name": "is_active", "type": "TINYINT(1)", "defaultValueNumeric": 1 } },
+                { "column": { "name": "created_at", "type": "TIMESTAMP", "defaultValueComputed": "CURRENT_TIMESTAMP" } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
