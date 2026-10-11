@@ -1,0 +1,104 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "companies-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "companies",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGINT UNSIGNED",
+                    "autoIncrement": true,
+                    "constraints": {
+                      "primaryKey": true,
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "VARCHAR(255)"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "email",
+                    "type": "VARCHAR(255)",
+                    "constraints": {
+                      "unique": true,
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "phone",
+                    "type": "VARCHAR(255)",
+                    "constraints": {
+                      "unique": true,
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "otp",
+                    "type": "INT"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "verifyotp",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "domain",
+                    "type": "VARCHAR(255)"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "status",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "admin_approve",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "created_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

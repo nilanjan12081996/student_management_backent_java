@@ -44,6 +44,24 @@
     },
     {
       "include": {
+        "file": "migrations/company/01_companies.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/company/02_companies_status_default.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/teacher/01_teachers.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
         "file": "seeder/01_superadmin_seeder.json",
         "relativeToChangelogFile": true
       }

@@ -1,0 +1,21 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "companies-status-default-0",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "addDefaultValue": {
+              "tableName": "companies",
+              "columnName": "status",
+              "columnDataType": "TINYINT(1)",
+              "defaultValueNumeric": 0
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

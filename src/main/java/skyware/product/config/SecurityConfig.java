@@ -52,7 +52,8 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/error",
                                 "/api/auth/**",
-                                "/skyware/api/superadmin/**"// Basic auth endpoints (login, register)
+                                "/skyware/api/superadmin/**",
+                                "/skyware/api/company/**"// Basic auth endpoints (login, register)
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/superadmin/**").hasRole("SUPERADMIN")

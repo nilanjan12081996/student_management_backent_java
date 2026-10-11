@@ -1,0 +1,89 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "teachers-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "teachers",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGINT UNSIGNED",
+                    "autoIncrement": true,
+                    "constraints": {
+                      "primaryKey": true,
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "VARCHAR(255)"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "email",
+                    "type": "VARCHAR(255)",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "phone",
+                    "type": "VARCHAR(255)",
+                    "constraints": {
+                      "unique": true
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "otp",
+                    "type": "INT"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "verifyotp",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "status",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 1
+                  }
+                },
+                {
+                  "column": {
+                    "name": "created_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
