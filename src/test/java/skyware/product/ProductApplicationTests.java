@@ -1,5 +1,6 @@
 package skyware.product;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,7 @@ class ProductApplicationTests {
 	}
 
 	@Test
+	@Disabled("Disabled to prevent consuming MySQL auto-increment IDs on the local database")
 	@Transactional
 	void testCompanyEntityAndTable() {
 		String testEmail = "test_" + System.currentTimeMillis() + "@acme.com";
@@ -82,6 +84,7 @@ class ProductApplicationTests {
 	private skyware.product.skywareapi.company.service.CompanyService companyService;
 
 	@Test
+	@Disabled("Disabled to prevent consuming MySQL auto-increment IDs on the local database")
 	@Transactional
 	void testCompanyRegistrationAndVerifyOtp() {
 		String testEmail = "tech_" + System.currentTimeMillis() + "@solutions.com";
