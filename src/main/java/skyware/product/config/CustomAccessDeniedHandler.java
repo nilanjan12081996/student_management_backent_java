@@ -29,7 +29,15 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         // Check what endpoint they tried to hit to customize the message
         String uri = request.getRequestURI();
-        if (uri.startsWith("/admin/api/plan")) {
+        if (uri.startsWith("/admin/api/plan")
+                || uri.startsWith("/skyware/api/company/list")
+                || uri.startsWith("/skyware/api/company/all")
+                || uri.startsWith("/skyware/api/teacher/list")
+                || uri.startsWith("/skyware/api/teacher/all")
+                || uri.contains("/toggle-status")
+                || uri.contains("/status/")
+                || uri.equals("/skyware/api/company")
+                || uri.equals("/skyware/api/teacher")) {
             responseBody.put("message", "Access denied: You do not have Super Admin privileges.");
         } else {
             responseBody.put("message", "Access denied: You are not authorized to view this resource.");

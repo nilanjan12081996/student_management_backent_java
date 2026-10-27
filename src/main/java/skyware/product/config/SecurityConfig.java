@@ -4,10 +4,14 @@ package skyware.product.config;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import skyware.product.config.ratelimit.middleware.RateLimitFilter;
@@ -42,6 +47,22 @@ public class SecurityConfig {
                 .addFilterBefore(new RateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/skyware/api/company/list",
+                                "/skyware/api/company/all",
+                                "/skyware/api/company",
+                                "/skyware/api/company/toggle-status",
+                                "/skyware/api/company/toggle-status/**",
+                                "/skyware/api/company/status/**",
+                                "/skyware/api/company/*/toggle-status",
+                                "/skyware/api/teacher/list",
+                                "/skyware/api/teacher/all",
+                                "/skyware/api/teacher",
+                                "/skyware/api/teacher/toggle-status",
+                                "/skyware/api/teacher/toggle-status/**",
+                                "/skyware/api/teacher/status/**",
+                                "/skyware/api/teacher/*/toggle-status"
+                        ).hasRole("SUPERADMIN")
+                        .requestMatchers(
                                 "/public/**",
                                 "/static/**",
                                 "/v3/api-docs/**",
@@ -62,6 +83,16 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            Map<String, Object> responseBody = new HashMap<>();
+                            responseBody.put("status", false);
+                            responseBody.put("statusCode", 401);
+                            responseBody.put("message", "Unauthorized: Valid Super Admin token is required.");
+                            ObjectMapper mapper = new ObjectMapper();
+                            response.getWriter().write(mapper.writeValueAsString(responseBody));
+                        })
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .sessionManagement(session -> session

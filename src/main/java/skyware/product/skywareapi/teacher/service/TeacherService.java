@@ -2,6 +2,7 @@ package skyware.product.skywareapi.teacher.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skyware.product.error.ValidationError;
@@ -12,7 +13,9 @@ import skyware.product.skywareapi.teacher.entity.TeacherEntity;
 import skyware.product.skywareapi.teacher.repository.TeacherRepository;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,6 +107,29 @@ public class TeacherService {
 
         log.info("Teacher [{}] verified successfully via OTP. verifyotp=1, status=1", updated.getEmail());
 
+        return mapToDto(updated);
+    }
+
+    public List<TeacherResponseDto> getAllTeachers() {
+        return teacherRepository.findAll(Sort.by(Sort.Direction.DESC, "id"))
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TeacherResponseDto toggleTeacherStatus(Long id) {
+        if (id == null) {
+            throw new ValidationError("Teacher ID is required");
+        }
+        TeacherEntity teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new ValidationError("Teacher not found with id: " + id));
+
+        int newStatus = (teacher.getStatus() != null && teacher.getStatus() == 1) ? 0 : 1;
+        teacher.setStatus(newStatus);
+        TeacherEntity updated = teacherRepository.save(teacher);
+
+        log.info("Teacher ID [{}] ({}) status toggled to {}.", id, updated.getName(), newStatus);
         return mapToDto(updated);
     }
 

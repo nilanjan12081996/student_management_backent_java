@@ -2,6 +2,7 @@ package skyware.product.skywareapi.company.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import skyware.product.error.ValidationError;
@@ -12,7 +13,9 @@ import skyware.product.skywareapi.company.entity.CompanyEntity;
 import skyware.product.skywareapi.company.repository.CompanyRepository;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -177,6 +180,29 @@ public class CompanyService {
                 throw new ValidationError("Invalid activation token or email");
             }
         }
+    }
+
+    public List<CompanyResponseDto> getAllCompanies() {
+        return companyRepository.findAll(Sort.by(Sort.Direction.DESC, "id"))
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CompanyResponseDto toggleCompanyStatus(Long id) {
+        if (id == null) {
+            throw new ValidationError("Company ID is required");
+        }
+        CompanyEntity company = companyRepository.findById(id)
+                .orElseThrow(() -> new ValidationError("Company not found with id: " + id));
+
+        int newStatus = (company.getStatus() != null && company.getStatus() == 1) ? 0 : 1;
+        company.setStatus(newStatus);
+        CompanyEntity updated = companyRepository.save(company);
+
+        log.info("Company ID [{}] ({}) status toggled to {}.", id, updated.getName(), newStatus);
+        return mapToDto(updated);
     }
 
     private CompanyResponseDto mapToDto(CompanyEntity entity) {

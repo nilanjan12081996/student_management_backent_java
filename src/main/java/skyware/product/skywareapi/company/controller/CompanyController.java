@@ -3,6 +3,7 @@ package skyware.product.skywareapi.company.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import skyware.product.skywareapi.company.dto.CompanyVerifyOtpRequestDto;
 import skyware.product.skywareapi.company.service.CompanyService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -274,6 +276,90 @@ public class CompanyController {
             response.put("statusCode", 400);
             response.put("status", false);
             response.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @GetMapping({"", "/list", "/all"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> getAllCompanies() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<CompanyResponseDto> companies = companyService.getAllCompanies();
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Company list fetched successfully");
+            response.put("totalCompanies", companies.size());
+            response.put("data", companies);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while fetching company list");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @PatchMapping(value = {"/toggle-status/{id}", "/status/{id}", "/{id}/toggle-status"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> toggleCompanyStatus(@PathVariable("id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            CompanyResponseDto updatedCompany = companyService.toggleCompanyStatus(id);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Company status toggled successfully to " + updatedCompany.getStatus());
+            response.put("currentStatus", updatedCompany.getStatus());
+            response.put("data", updatedCompany);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while toggling status");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @PatchMapping("/toggle-status")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> toggleCompanyStatusByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestBody(required = false) Map<String, Object> body) {
+        Map<String, Object> response = new HashMap<>();
+        Long targetId = queryId;
+        if (targetId == null && body != null && body.get("id") != null) {
+            try {
+                targetId = Long.valueOf(body.get("id").toString());
+            } catch (Exception ignored) {}
+        }
+        if (targetId == null) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", "Company id parameter is required (e.g. ?id=12)");
+            return ResponseEntity.status(422).body(response);
+        }
+        try {
+            CompanyResponseDto updatedCompany = companyService.toggleCompanyStatus(targetId);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Company status toggled successfully to " + updatedCompany.getStatus());
+            response.put("currentStatus", updatedCompany.getStatus());
+            response.put("data", updatedCompany);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while toggling status");
             return ResponseEntity.status(400).body(response);
         }
     }
