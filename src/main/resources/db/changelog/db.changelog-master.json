@@ -62,6 +62,24 @@
     },
     {
       "include": {
+        "file": "migrations/teacher/02_teacher_company_maps.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/specialisation/01_specialisations.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/teacher/03_teacher_specialisation_maps.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
         "file": "seeder/01_superadmin_seeder.json",
         "relativeToChangelogFile": true
       }

@@ -80,6 +80,130 @@ class ProductApplicationTests {
 		}
 	}
 
+	@Test
+	void testTeacherCompanyMapsTableExists() throws Exception {
+		try (var conn = dataSource.getConnection();
+		     var stmt = conn.createStatement()) {
+			var rs = stmt.executeQuery("DESCRIBE teacher_company_maps");
+			boolean hasId = false, hasTeacherId = false, hasCompanyId = false, hasStatus = false, hasCreatedAt = false, hasUpdatedAt = false;
+			while (rs.next()) {
+				String field = rs.getString("Field");
+				if ("id".equalsIgnoreCase(field)) hasId = true;
+				if ("teacher_id".equalsIgnoreCase(field)) hasTeacherId = true;
+				if ("company_id".equalsIgnoreCase(field)) hasCompanyId = true;
+				if ("status".equalsIgnoreCase(field)) hasStatus = true;
+				if ("created_at".equalsIgnoreCase(field)) hasCreatedAt = true;
+				if ("updated_at".equalsIgnoreCase(field)) hasUpdatedAt = true;
+			}
+			assertTrue(hasId);
+			assertTrue(hasTeacherId);
+			assertTrue(hasCompanyId);
+			assertTrue(hasStatus);
+			assertTrue(hasCreatedAt);
+			assertTrue(hasUpdatedAt);
+		}
+	}
+
+	@Test
+	void testSpecialisationsTableExists() throws Exception {
+		try (var conn = dataSource.getConnection();
+		     var stmt = conn.createStatement()) {
+			var rs = stmt.executeQuery("DESCRIBE specialisations");
+			boolean hasId = false, hasName = false, hasShortName = false, hasStatus = false, hasCreatedAt = false, hasUpdatedAt = false;
+			while (rs.next()) {
+				String field = rs.getString("Field");
+				if ("id".equalsIgnoreCase(field)) hasId = true;
+				if ("name".equalsIgnoreCase(field)) hasName = true;
+				if ("short_name".equalsIgnoreCase(field)) hasShortName = true;
+				if ("status".equalsIgnoreCase(field)) hasStatus = true;
+				if ("created_at".equalsIgnoreCase(field)) hasCreatedAt = true;
+				if ("updated_at".equalsIgnoreCase(field)) hasUpdatedAt = true;
+			}
+			assertTrue(hasId);
+			assertTrue(hasName);
+			assertTrue(hasShortName);
+			assertTrue(hasStatus);
+			assertTrue(hasCreatedAt);
+			assertTrue(hasUpdatedAt);
+		}
+	}
+
+	@Test
+	void testTeacherSpecialisationMapsTableExists() throws Exception {
+		try (var conn = dataSource.getConnection();
+		     var stmt = conn.createStatement()) {
+			var rs = stmt.executeQuery("DESCRIBE teacher_specialisation_maps");
+			boolean hasId = false, hasTeacherId = false, hasSpId = false, hasStatus = false, hasCreatedAt = false, hasUpdatedAt = false;
+			while (rs.next()) {
+				String field = rs.getString("Field");
+				if ("id".equalsIgnoreCase(field)) hasId = true;
+				if ("teacher_id".equalsIgnoreCase(field)) hasTeacherId = true;
+				if ("sp_id".equalsIgnoreCase(field)) hasSpId = true;
+				if ("status".equalsIgnoreCase(field)) hasStatus = true;
+				if ("created_at".equalsIgnoreCase(field)) hasCreatedAt = true;
+				if ("updated_at".equalsIgnoreCase(field)) hasUpdatedAt = true;
+			}
+			assertTrue(hasId);
+			assertTrue(hasTeacherId);
+			assertTrue(hasSpId);
+			assertTrue(hasStatus);
+			assertTrue(hasCreatedAt);
+			assertTrue(hasUpdatedAt);
+		}
+	}
+
+	@Autowired
+	private skyware.product.skywareapi.specialisation.service.SpecialisationService specialisationService;
+
+	@Test
+	@Transactional
+	void testSpecialisationCrudAndValidations() {
+		// 1. Validation: Name and short_name cannot be the same
+		var sameNameDto = skyware.product.skywareapi.specialisation.dto.SpecialisationRequestDto.builder()
+				.name("Computer Science")
+				.shortName("Computer Science")
+				.build();
+		assertThrows(skyware.product.error.ValidationError.class, () -> specialisationService.addSpecialisation(sameNameDto));
+
+		// 2. Add: valid specialisation
+		String uniqueSuffix = "_" + System.currentTimeMillis();
+		var validDto = skyware.product.skywareapi.specialisation.dto.SpecialisationRequestDto.builder()
+				.name("Computer Science" + uniqueSuffix)
+				.shortName("CS" + uniqueSuffix)
+				.build();
+		var created = specialisationService.addSpecialisation(validDto);
+		assertNotNull(created.getId());
+		assertEquals("Computer Science" + uniqueSuffix, created.getName());
+		assertEquals("CS" + uniqueSuffix, created.getShortName());
+
+		// 3. Get all
+		var list = specialisationService.getAllSpecialisations();
+		assertFalse(list.isEmpty());
+
+		// 4. Update: Non-existent ID should throw ValidationError
+		var updateDto = skyware.product.skywareapi.specialisation.dto.SpecialisationRequestDto.builder()
+				.name("Updated Name" + uniqueSuffix)
+				.shortName("UN" + uniqueSuffix)
+				.build();
+		assertThrows(skyware.product.error.ValidationError.class, () -> specialisationService.updateSpecialisation(999999L, updateDto));
+
+		// 5. Update: Same name and short name should throw ValidationError
+		var invalidUpdateDto = skyware.product.skywareapi.specialisation.dto.SpecialisationRequestDto.builder()
+				.name("SameName" + uniqueSuffix)
+				.shortName("SameName" + uniqueSuffix)
+				.build();
+		assertThrows(skyware.product.error.ValidationError.class, () -> specialisationService.updateSpecialisation(created.getId(), invalidUpdateDto));
+
+		// 6. Update: Valid update succeeds
+		var updated = specialisationService.updateSpecialisation(created.getId(), updateDto);
+		assertEquals("Updated Name" + uniqueSuffix, updated.getName());
+		assertEquals("UN" + uniqueSuffix, updated.getShortName());
+
+		// 7. Delete: Valid delete succeeds
+		specialisationService.deleteSpecialisation(created.getId());
+		assertThrows(skyware.product.error.ValidationError.class, () -> specialisationService.getSpecialisationById(created.getId()));
+	}
+
 	@Autowired
 	private skyware.product.skywareapi.company.service.CompanyService companyService;
 

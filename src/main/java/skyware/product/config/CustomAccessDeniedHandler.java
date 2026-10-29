@@ -34,6 +34,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 || uri.startsWith("/skyware/api/company/all")
                 || uri.startsWith("/skyware/api/teacher/list")
                 || uri.startsWith("/skyware/api/teacher/all")
+                || uri.startsWith("/skyware/api/specialisation")
                 || uri.contains("/toggle-status")
                 || uri.contains("/status/")
                 || uri.equals("/skyware/api/company")

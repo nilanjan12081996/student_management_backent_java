@@ -60,8 +60,15 @@ public class SecurityConfig {
                                 "/skyware/api/teacher/toggle-status",
                                 "/skyware/api/teacher/toggle-status/**",
                                 "/skyware/api/teacher/status/**",
-                                "/skyware/api/teacher/*/toggle-status"
-                        ).hasRole("SUPERADMIN")
+                                "/skyware/api/teacher/*/toggle-status",
+                                "/skyware/api/teacher/map-specialisation",
+                                "/skyware/api/teacher/specialisation/**",
+                                "/skyware/api/teacher-specialisation/**",
+                                "/skyware/api/teacher/map-company",
+                                "/skyware/api/teacher/company/**",
+                                "/skyware/api/teacher-company/**",
+                                "/skyware/api/specialisation/**"
+                        ).hasAnyRole("SUPERADMIN", "ADMIN")
                         .requestMatchers(
                                 "/public/**",
                                 "/static/**",
