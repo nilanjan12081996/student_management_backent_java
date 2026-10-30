@@ -282,13 +282,23 @@ public class CompanyController {
 
     @GetMapping({"", "/list", "/all"})
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public ResponseEntity<?> getAllCompanies() {
+    public ResponseEntity<?> getAllCompanies(
+            @RequestParam(value = "admin_approve", required = false) Integer adminApproveSnake,
+            @RequestParam(value = "adminApprove", required = false) Integer adminApproveCamel) {
         Map<String, Object> response = new HashMap<>();
+        Integer targetAdminApprove = adminApproveSnake != null ? adminApproveSnake : adminApproveCamel;
         try {
-            List<CompanyResponseDto> companies = companyService.getAllCompanies();
+            List<CompanyResponseDto> companies = (targetAdminApprove != null)
+                    ? companyService.getCompaniesByAdminApprove(targetAdminApprove)
+                    : companyService.getAllCompanies();
+
+            String message = (targetAdminApprove != null)
+                    ? "Companies with admin_approve = " + targetAdminApprove + " fetched successfully"
+                    : "Company list fetched successfully";
+
             response.put("statusCode", 200);
             response.put("status", true);
-            response.put("message", "Company list fetched successfully");
+            response.put("message", message);
             response.put("totalCompanies", companies.size());
             response.put("data", companies);
             return ResponseEntity.ok(response);
@@ -296,6 +306,26 @@ public class CompanyController {
             response.put("statusCode", 400);
             response.put("status", false);
             response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while fetching company list");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @GetMapping({"/pending-approval", "/unapproved", "/admin-approve-pending", "/pending"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> getUnapprovedCompanies() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<CompanyResponseDto> companies = companyService.getCompaniesByAdminApprove(0);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Pending admin-approval (admin_approve = 0) company list fetched successfully");
+            response.put("totalCompanies", companies.size());
+            response.put("data", companies);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while fetching unapproved company list");
             return ResponseEntity.status(400).body(response);
         }
     }
@@ -360,6 +390,72 @@ public class CompanyController {
             response.put("statusCode", 400);
             response.put("status", false);
             response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while toggling status");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RequestMapping(
+            value = {"/approve/{id}", "/admin-approve/{id}", "/{id}/approve", "/{id}/admin-approve"},
+            method = {RequestMethod.PATCH, RequestMethod.POST, RequestMethod.PUT}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> approveCompanyById(@PathVariable("id") Long id) {
+        return processApprove(id);
+    }
+
+    @RequestMapping(
+            value = {"/approve", "/admin-approve"},
+            method = {RequestMethod.PATCH, RequestMethod.POST, RequestMethod.PUT}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> approveCompanyByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestParam(value = "companyId", required = false) Long queryCompanyId,
+            @RequestParam(value = "company_id", required = false) Long queryCompanyIdSnake,
+            @RequestBody(required = false) Map<String, Object> body) {
+
+        Long targetId = queryId != null ? queryId : (queryCompanyId != null ? queryCompanyId : queryCompanyIdSnake);
+
+        if (targetId == null && body != null) {
+            Object idObj = body.get("id");
+            if (idObj == null) idObj = body.get("companyId");
+            if (idObj == null) idObj = body.get("company_id");
+            if (idObj != null) {
+                try {
+                    targetId = Long.valueOf(idObj.toString().trim());
+                } catch (Exception ignored) {}
+            }
+        }
+
+        return processApprove(targetId);
+    }
+
+    private ResponseEntity<?> processApprove(Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", "Company ID is required to approve company (e.g. ?id=12 or /approve/12)");
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            CompanyResponseDto approvedCompany = companyService.approveCompany(id);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Company approved successfully. admin_approve set to 1.");
+            response.put("data", approvedCompany);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while approving company");
             return ResponseEntity.status(400).body(response);
         }
     }

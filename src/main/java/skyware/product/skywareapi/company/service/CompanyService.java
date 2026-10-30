@@ -189,6 +189,35 @@ public class CompanyService {
                 .collect(Collectors.toList());
     }
 
+    public List<CompanyResponseDto> getCompaniesByAdminApprove(Integer adminApprove) {
+        if (adminApprove == null) {
+            return getAllCompanies();
+        }
+        return companyRepository.findByAdminApprove(adminApprove, Sort.by(Sort.Direction.DESC, "id"))
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CompanyResponseDto approveCompany(Long id) {
+        if (id == null) {
+            throw new ValidationError("Company ID is required");
+        }
+        CompanyEntity company = companyRepository.findById(id)
+                .orElseThrow(() -> new ValidationError("Company not found with id: " + id));
+
+        if (company.getAdminApprove() != null && company.getAdminApprove() == 1) {
+            throw new ValidationError("Company is already approved");
+        }
+
+        company.setAdminApprove(1);
+        CompanyEntity updated = companyRepository.save(company);
+
+        log.info("Company ID [{}] ({}) successfully approved by Super Admin. admin_approve set to 1.", id, updated.getName());
+        return mapToDto(updated);
+    }
+
     @Transactional
     public CompanyResponseDto toggleCompanyStatus(Long id) {
         if (id == null) {
