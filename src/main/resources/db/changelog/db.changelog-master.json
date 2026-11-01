@@ -80,6 +80,12 @@
     },
     {
       "include": {
+        "file": "migrations/course/01_courses.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
         "file": "seeder/01_superadmin_seeder.json",
         "relativeToChangelogFile": true
       }

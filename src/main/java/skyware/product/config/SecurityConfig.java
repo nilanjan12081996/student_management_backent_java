@@ -77,6 +77,7 @@ public class SecurityConfig {
                                 "/skyware/api/teacher/map-company",
                                 "/skyware/api/teacher/company/**",
                                 "/skyware/api/teacher-company/**",
+                                "/skyware/api/course/**",
                                 "/skyware/api/specialisation/**"
                         ).hasAnyRole("SUPERADMIN", "ADMIN")
                         .requestMatchers(

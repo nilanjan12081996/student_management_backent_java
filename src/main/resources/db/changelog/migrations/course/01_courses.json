@@ -1,0 +1,86 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "courses-1",
+        "author": "skyware",
+        "validCheckSum": "ANY",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "courses",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGINT UNSIGNED",
+                    "autoIncrement": true,
+                    "constraints": {
+                      "primaryKey": true,
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "VARCHAR(255)",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "subject",
+                    "type": "VARCHAR(255)"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "short_name",
+                    "type": "VARCHAR(255)"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "status",
+                    "type": "TINYINT(1)",
+                    "defaultValueNumeric": 0
+                  }
+                },
+                {
+                  "column": {
+                    "name": "related_id",
+                    "type": "BIGINT"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "related_type",
+                    "type": "ENUM('superadmin', 'company', 'teacher')"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "created_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "updated_at",
+                    "type": "TIMESTAMP",
+                    "defaultValueComputed": "CURRENT_TIMESTAMP"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+
