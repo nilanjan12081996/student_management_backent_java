@@ -44,6 +44,10 @@ public class CompanyEntity {
     @Column(name = "admin_approve")
     private Integer adminApprove = 0;
 
+    @Builder.Default
+    @Column(name = "created_by_superadmin")
+    private Integer createdBySuperadmin = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

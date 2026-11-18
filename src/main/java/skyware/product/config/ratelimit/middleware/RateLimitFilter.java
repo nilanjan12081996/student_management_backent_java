@@ -42,8 +42,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
         @Override
         protected boolean shouldNotFilter(HttpServletRequest request) {
             String path = request.getRequestURI();
-            // Skip rate limiting if the request is for the chat socket
-            return path.startsWith("/ws-chat");
+            // Skip rate limiting for preflight OPTIONS and WebSocket chat
+            return "OPTIONS".equalsIgnoreCase(request.getMethod()) || path.startsWith("/ws-chat");
         }
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

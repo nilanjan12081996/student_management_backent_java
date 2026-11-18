@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import skyware.product.error.ValidationError;
 import skyware.product.skywareapi.teacher.dto.TeacherRegisterRequestDto;
 import skyware.product.skywareapi.teacher.dto.TeacherResponseDto;
+import skyware.product.skywareapi.teacher.dto.TeacherUpdateRequestDto;
 import skyware.product.skywareapi.teacher.dto.TeacherCompanyMapRequestDto;
 import skyware.product.skywareapi.teacher.dto.TeacherCompanyMapResponseDto;
 import skyware.product.skywareapi.teacher.dto.TeacherSpecialisationMapRequestDto;
@@ -51,6 +52,45 @@ public class TeacherController {
         try {
             TeacherResponseDto teacherResponseDto = teacherService.register(registerDto);
             response.put("message", "Teacher registered successfully. An OTP has been sent to your email.");
+            response.put("status", true);
+            response.put("statusCode", 201);
+            response.put("data", teacherResponseDto);
+            return ResponseEntity.status(201).body(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred");
+            response.put("status", false);
+            response.put("statusCode", 400);
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @PostMapping({"/add", "/create"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> addTeacherBySuperAdmin(
+            @Valid @RequestBody TeacherRegisterRequestDto registerDto,
+            BindingResult bindingResult) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            response.put("message", "validation error");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            response.put("error", errors);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            TeacherResponseDto teacherResponseDto = teacherService.createTeacherBySuperAdmin(registerDto);
+            response.put("message", "Teacher added successfully by SuperAdmin (created_by_superadmin = 1)");
             response.put("status", true);
             response.put("statusCode", 201);
             response.put("data", teacherResponseDto);
@@ -184,6 +224,158 @@ public class TeacherController {
             response.put("statusCode", 400);
             response.put("status", false);
             response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while toggling status");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @GetMapping({"/details/{id}", "/get/{id}", "/{id}"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> getTeacherDetails(@PathVariable("id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            TeacherResponseDto teacher = teacherService.getTeacherById(id);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Teacher details fetched successfully");
+            response.put("data", teacher);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while fetching teacher");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RequestMapping(
+            value = {"/update/{id}", "/{id}/update", "/edit/{id}"},
+            method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.PATCH}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> updateTeacherById(
+            @PathVariable("id") Long id,
+            @RequestBody(required = false) TeacherUpdateRequestDto updateDto) {
+        return processUpdate(id, updateDto);
+    }
+
+    @RequestMapping(
+            value = "/update",
+            method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.PATCH}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> updateTeacherByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestParam(value = "teacherId", required = false) Long queryTeacherId,
+            @RequestBody(required = false) TeacherUpdateRequestDto updateDto) {
+
+        Long targetId = queryId != null ? queryId : queryTeacherId;
+        if (targetId == null && updateDto != null && updateDto.getId() != null) {
+            targetId = updateDto.getId();
+        }
+        return processUpdate(targetId, updateDto);
+    }
+
+    private ResponseEntity<?> processUpdate(Long id, TeacherUpdateRequestDto updateDto) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("message", "Teacher ID is required to update teacher (e.g. /update/1 or ?id=1)");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        if (updateDto == null) {
+            response.put("message", "Request body is required for updating teacher");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            TeacherResponseDto updatedTeacher = teacherService.updateTeacher(id, updateDto);
+            response.put("message", "Teacher updated successfully by SuperAdmin");
+            response.put("status", true);
+            response.put("statusCode", 200);
+            response.put("data", updatedTeacher);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while updating teacher");
+            response.put("status", false);
+            response.put("statusCode", 400);
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RequestMapping(
+            value = {"/delete/{id}", "/{id}/delete", "/{id}"},
+            method = {RequestMethod.DELETE, RequestMethod.POST}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> deleteTeacherById(@PathVariable("id") Long id) {
+        return processDelete(id);
+    }
+
+    @RequestMapping(
+            value = "/delete",
+            method = {RequestMethod.DELETE, RequestMethod.POST}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> deleteTeacherByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestParam(value = "teacherId", required = false) Long queryTeacherId,
+            @RequestBody(required = false) Map<String, Object> body) {
+
+        Long targetId = queryId != null ? queryId : queryTeacherId;
+        if (targetId == null && body != null) {
+            Object idObj = body.get("id");
+            if (idObj == null) idObj = body.get("teacherId");
+            if (idObj != null) {
+                try {
+                    targetId = Long.valueOf(idObj.toString().trim());
+                } catch (Exception ignored) {}
+            }
+        }
+        return processDelete(targetId);
+    }
+
+    private ResponseEntity<?> processDelete(Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("message", "Teacher ID is required to delete teacher (e.g. /delete/1 or ?id=1)");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            TeacherResponseDto deletedTeacher = teacherService.deleteTeacher(id);
+            response.put("message", "Teacher deleted successfully by SuperAdmin");
+            response.put("status", true);
+            response.put("statusCode", 200);
+            response.put("deletedTeacherId", id);
+            response.put("data", deletedTeacher);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while deleting teacher");
+            response.put("status", false);
+            response.put("statusCode", 400);
             return ResponseEntity.status(400).body(response);
         }
     }

@@ -37,6 +37,10 @@ public class TeacherEntity {
     @Column(name = "status")
     private Integer status = 0;
 
+    @Builder.Default
+    @Column(name = "created_by_superadmin")
+    private Integer createdBySuperadmin = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -56,6 +60,9 @@ public class TeacherEntity {
         }
         if (status == null) {
             status = 0;
+        }
+        if (createdBySuperadmin == null) {
+            createdBySuperadmin = 0;
         }
     }
 

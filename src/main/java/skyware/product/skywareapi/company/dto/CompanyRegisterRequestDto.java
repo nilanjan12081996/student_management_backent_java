@@ -24,4 +24,6 @@ public class CompanyRegisterRequestDto {
     private String phone;
 
     private String domain;
+
+    private Integer createdBySuperadmin;
 }

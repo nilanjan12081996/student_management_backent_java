@@ -56,6 +56,12 @@
     },
     {
       "include": {
+        "file": "migrations/company/03_companies_add_created_by_superadmin.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
         "file": "migrations/teacher/01_teachers.json",
         "relativeToChangelogFile": true
       }
@@ -75,6 +81,12 @@
     {
       "include": {
         "file": "migrations/teacher/03_teacher_specialisation_maps.json",
+        "relativeToChangelogFile": true
+      }
+    },
+    {
+      "include": {
+        "file": "migrations/teacher/04_teachers_add_created_by_superadmin.json",
         "relativeToChangelogFile": true
       }
     },

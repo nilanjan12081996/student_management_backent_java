@@ -22,4 +22,6 @@ public class TeacherRegisterRequestDto {
 
     @NotBlank(message = "Phone number is required")
     private String phone;
+
+    private Integer createdBySuperadmin;
 }

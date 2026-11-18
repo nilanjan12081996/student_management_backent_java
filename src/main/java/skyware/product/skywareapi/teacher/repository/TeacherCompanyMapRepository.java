@@ -15,4 +15,6 @@ public interface TeacherCompanyMapRepository extends JpaRepository<TeacherCompan
     Optional<TeacherCompanyMapEntity> findByTeacherIdAndStatus(Long teacherId, Integer status);
     boolean existsByTeacherIdAndStatus(Long teacherId, Integer status);
     void deleteByTeacherIdAndCompanyId(Long teacherId, Long companyId);
+    void deleteByTeacherId(Long teacherId);
+    void deleteByCompanyId(Long companyId);
 }

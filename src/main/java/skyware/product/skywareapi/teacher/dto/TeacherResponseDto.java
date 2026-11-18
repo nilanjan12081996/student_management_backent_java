@@ -19,6 +19,7 @@ public class TeacherResponseDto {
     private Integer otp;
     private Integer verifyotp;
     private Integer status;
+    private Integer createdBySuperadmin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

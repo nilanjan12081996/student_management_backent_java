@@ -11,6 +11,7 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -46,10 +47,19 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(new RateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/skyware/api/company/list",
                                 "/skyware/api/company/all",
                                 "/skyware/api/company",
+                                "/skyware/api/company/add",
+                                "/skyware/api/company/create",
+                                "/skyware/api/company/update",
+                                "/skyware/api/company/update/**",
+                                "/skyware/api/company/delete",
+                                "/skyware/api/company/delete/**",
+                                "/skyware/api/company/details/**",
+                                "/skyware/api/company/get/**",
                                 "/skyware/api/company/pending-approval",
                                 "/skyware/api/company/unapproved",
                                 "/skyware/api/company/admin-approve-pending",
@@ -67,6 +77,14 @@ public class SecurityConfig {
                                 "/skyware/api/teacher/list",
                                 "/skyware/api/teacher/all",
                                 "/skyware/api/teacher",
+                                "/skyware/api/teacher/add",
+                                "/skyware/api/teacher/create",
+                                "/skyware/api/teacher/update",
+                                "/skyware/api/teacher/update/**",
+                                "/skyware/api/teacher/delete",
+                                "/skyware/api/teacher/delete/**",
+                                "/skyware/api/teacher/details/**",
+                                "/skyware/api/teacher/get/**",
                                 "/skyware/api/teacher/toggle-status",
                                 "/skyware/api/teacher/toggle-status/**",
                                 "/skyware/api/teacher/status/**",
@@ -130,7 +148,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH","DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition", "Content-Type"));
+        configuration.setMaxAge(3600L);
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

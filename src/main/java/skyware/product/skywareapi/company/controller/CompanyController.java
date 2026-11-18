@@ -11,6 +11,7 @@ import skyware.product.error.ValidationError;
 import skyware.product.skywareapi.company.dto.CompanyActivateRequestDto;
 import skyware.product.skywareapi.company.dto.CompanyRegisterRequestDto;
 import skyware.product.skywareapi.company.dto.CompanyResponseDto;
+import skyware.product.skywareapi.company.dto.CompanyUpdateRequestDto;
 import skyware.product.skywareapi.company.dto.CompanyVerifyOtpRequestDto;
 import skyware.product.skywareapi.company.service.CompanyService;
 
@@ -44,6 +45,45 @@ public class CompanyController {
         try {
             CompanyResponseDto companyResponseDto = companyService.register(registerDto);
             response.put("message", "Company registered successfully. An OTP has been sent to your email.");
+            response.put("status", true);
+            response.put("statusCode", 201);
+            response.put("data", companyResponseDto);
+            return ResponseEntity.status(201).body(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred");
+            response.put("status", false);
+            response.put("statusCode", 400);
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @PostMapping({"/add", "/create"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> addCompanyBySuperAdmin(
+            @Valid @RequestBody CompanyRegisterRequestDto registerDto,
+            BindingResult bindingResult) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+            response.put("message", "validation error");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            response.put("error", errors);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            CompanyResponseDto companyResponseDto = companyService.createCompanyBySuperAdmin(registerDto);
+            response.put("message", "Company added successfully by SuperAdmin (created_by_superadmin = 1, admin_approve = 1)");
             response.put("status", true);
             response.put("statusCode", 201);
             response.put("data", companyResponseDto);
@@ -456,6 +496,161 @@ public class CompanyController {
             response.put("statusCode", 400);
             response.put("status", false);
             response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while approving company");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @GetMapping({"/details/{id}", "/get/{id}", "/{id}"})
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> getCompanyDetails(@PathVariable("id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            CompanyResponseDto company = companyService.getCompanyById(id);
+            response.put("statusCode", 200);
+            response.put("status", true);
+            response.put("message", "Company details fetched successfully");
+            response.put("data", company);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("statusCode", 422);
+            response.put("status", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("statusCode", 400);
+            response.put("status", false);
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while fetching company");
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RequestMapping(
+            value = {"/update/{id}", "/{id}/update", "/edit/{id}"},
+            method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.PATCH}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> updateCompanyById(
+            @PathVariable("id") Long id,
+            @RequestBody(required = false) CompanyUpdateRequestDto updateDto) {
+        return processUpdate(id, updateDto);
+    }
+
+    @RequestMapping(
+            value = "/update",
+            method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.PATCH}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> updateCompanyByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestParam(value = "companyId", required = false) Long queryCompanyId,
+            @RequestParam(value = "company_id", required = false) Long queryCompanyIdSnake,
+            @RequestBody(required = false) CompanyUpdateRequestDto updateDto) {
+
+        Long targetId = queryId != null ? queryId : (queryCompanyId != null ? queryCompanyId : queryCompanyIdSnake);
+        if (targetId == null && updateDto != null && updateDto.getId() != null) {
+            targetId = updateDto.getId();
+        }
+        return processUpdate(targetId, updateDto);
+    }
+
+    private ResponseEntity<?> processUpdate(Long id, CompanyUpdateRequestDto updateDto) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("message", "Company ID is required to update company (e.g. /update/1 or ?id=1)");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        if (updateDto == null) {
+            response.put("message", "Request body is required for updating company");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            CompanyResponseDto updatedCompany = companyService.updateCompany(id, updateDto);
+            response.put("message", "Company updated successfully by SuperAdmin");
+            response.put("status", true);
+            response.put("statusCode", 200);
+            response.put("data", updatedCompany);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while updating company");
+            response.put("status", false);
+            response.put("statusCode", 400);
+            return ResponseEntity.status(400).body(response);
+        }
+    }
+
+    @RequestMapping(
+            value = {"/delete/{id}", "/{id}/delete", "/{id}"},
+            method = {RequestMethod.DELETE, RequestMethod.POST}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> deleteCompanyById(@PathVariable("id") Long id) {
+        return processDelete(id);
+    }
+
+    @RequestMapping(
+            value = "/delete",
+            method = {RequestMethod.DELETE, RequestMethod.POST}
+    )
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public ResponseEntity<?> deleteCompanyByParam(
+            @RequestParam(value = "id", required = false) Long queryId,
+            @RequestParam(value = "companyId", required = false) Long queryCompanyId,
+            @RequestParam(value = "company_id", required = false) Long queryCompanyIdSnake,
+            @RequestBody(required = false) Map<String, Object> body) {
+
+        Long targetId = queryId != null ? queryId : (queryCompanyId != null ? queryCompanyId : queryCompanyIdSnake);
+        if (targetId == null && body != null) {
+            Object idObj = body.get("id");
+            if (idObj == null) idObj = body.get("companyId");
+            if (idObj == null) idObj = body.get("company_id");
+            if (idObj != null) {
+                try {
+                    targetId = Long.valueOf(idObj.toString().trim());
+                } catch (Exception ignored) {}
+            }
+        }
+        return processDelete(targetId);
+    }
+
+    private ResponseEntity<?> processDelete(Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("message", "Company ID is required to delete company (e.g. /delete/1 or ?id=1)");
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        }
+
+        try {
+            CompanyResponseDto deletedCompany = companyService.deleteCompany(id);
+            response.put("message", "Company deleted successfully by SuperAdmin");
+            response.put("status", true);
+            response.put("statusCode", 200);
+            response.put("deletedCompanyId", id);
+            response.put("data", deletedCompany);
+            return ResponseEntity.ok(response);
+        } catch (ValidationError e) {
+            response.put("message", e.getMessage());
+            response.put("status", false);
+            response.put("statusCode", 422);
+            return ResponseEntity.status(422).body(response);
+        } catch (Exception e) {
+            response.put("message", e.getMessage() != null ? e.getMessage() : "An unexpected error occurred while deleting company");
+            response.put("status", false);
+            response.put("statusCode", 400);
             return ResponseEntity.status(400).body(response);
         }
     }

@@ -21,6 +21,7 @@ public class CompanyResponseDto {
     private Integer verifyotp;
     private Integer status;
     private Integer adminApprove;
+    private Integer createdBySuperadmin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
